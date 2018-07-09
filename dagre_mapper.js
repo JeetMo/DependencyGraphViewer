@@ -9,6 +9,7 @@ $(document).ready(function(){
       root;
 
   var root_table = new Object()
+  var table_graph = new Object()
 
   var tree = d3.layout.tree()
       .size([height, width]);
@@ -38,10 +39,11 @@ $(document).ready(function(){
     if (error) throw error;
     console.log("entered")
 
-    console.log(tables)
+    console.log("tables", tables)
 
     for (key in tables){
       root_table[key] = new Object()
+
       for (row in tables[key]){
         row = tables[key][row]
         var name = row.name
@@ -53,22 +55,28 @@ $(document).ready(function(){
     }
 
     for (key in tables){
+      children_tables = new Set()
       for (row in tables[key]){
         row = tables[key][row]
         var children = row['children'].map(x => root_table[x[0]][x[1]])
+        var t_child = row['children'].map(x => x[0])
+        t_child.forEach(function(d){children_tables.add(d)})
+        // children_tables.push(new Set(row['children'].map(x => x[0])))
         if (children.length == 0){
           children = null
         }
         root_table[key][row.name].children = children
       }
+      table_graph[key] = {"name": key, "children": [...children_tables]}
     }
 
     d3.json("http://127.0.0.1:5000/api/results", function(error, flare) {
       if (error) throw error;
 
-      console.log(flare)
+      console.log("root", flare)
       var root_children = flare['children'].map(x => root_table[x[0]][x[1]])
       root = {'name': "Portfolios", 'children': root_children}
+      // table_graph['Portfolios'] = {name:'Portfolios', children: ['table_t1']}
 
       root.x0 = height / 2;
       root.y0 = 0;
@@ -84,28 +92,53 @@ $(document).ready(function(){
       root.children.forEach(collapse);
       update(root);
     });
+
+    console.log(table_graph)
   });
+
 
   d3.select(self.frameElement).style("height", "800px");
 
   function update(source) {
 
-    // Compute the new tree layout.
-    var nodes = tree.nodes(root), //.reverse(),
-        links = tree.links(nodes);
+    var graph = new dagre.graphlib.Graph();
 
+
+    // Compute the new tree layout.
+    var nodes = tree.nodes(root); //.reverse(),
+
+    Object.keys(table_graph).forEach(function(d){graph.setNode(d, table_graph[d])})
+
+    graph.setGraph({});
+    graph.setDefaultEdgeLabel(function() { return {}; });
+
+    // for (key in nodes){
+    //   for (child in nodes[key].children){
+    //       graph.setEdge(nodes[key].name, nodes[key].children[child].name, {"source": nodes[key], "target":nodes[key].children[child]})
+    //   }
+    // }
+
+    for (key in table_graph){
+      for (child in table_graph[key].children){
+        var t_source = table_graph[key]
+        var t_target = table_graph[table_graph[key].children[child]]
+        graph.setEdge(t_source.name, t_target.name, {"source": t_source, "target":t_target})
+      }
+    }
+
+    var isolates = graph.nodes().filter(v => graph.neighbors(v).length == 0)
+    isolates.forEach(function(v){graph.removeNode(v)})
+
+    dagre.layout(graph)
 
     // Normalize for fixed-depth.
     nodes.forEach(function(d) { d.y = d.depth * 180; });
-    nodes.forEach(function(d) {
-      console.log("parents", d.parent, d)
-      if (d.x > 1000){
-        d.x = d.parent.x;
-      }
-      });
     // Update the nodes…
+    graph.nodes().forEach(function(v){console.log(graph.node(v)); graph.node(v).x = graph.node(v).x/3})
+
+
     var node = svg.selectAll("g.node")
-        .data(nodes, function(d) { return d.id || (d.id = ++i); });
+        .data(graph.nodes().map(function(v){return graph.node(v)}), function(d) { return d.id || (d.id = ++i); });
 
     // Enter any new nodes at the parent's previous position.
     var nodeEnter = node.enter().append("g")
@@ -128,7 +161,6 @@ $(document).ready(function(){
     var nodeUpdate = node.transition()
         .duration(duration)
         .attr("transform", function(d) {
-          console.log(d.name, d.depth, "x,x0",d.x, d.x0)
           return "translate(" + d.y + "," + d.x + ")"; });
 
     nodeUpdate.select("circle")
@@ -152,7 +184,7 @@ $(document).ready(function(){
 
     // Update the links…
     var link = svg.selectAll("path.link")
-        .data(links, function(d) { return [d.source.id, d.target.id]; });
+        .data(graph.edges().map(function(e){return graph.edge(e)}), function(d) { return [d.source.id, d.target.id]; });
 
     // Enter any new links at the parent's previous position.
     link.enter().insert("path", "g")
@@ -177,7 +209,7 @@ $(document).ready(function(){
         .remove();
 
     // Stash the old positions for transition.
-    nodes.forEach(function(d) {
+    graph.nodes().forEach(function(d) {
       d.x0 = d.x;
       d.y0 = d.y;
     });
