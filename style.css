@@ -1,0 +1,28 @@
+.node {
+  cursor: pointer;
+}
+
+.node circle {
+  fill: #fff;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+.node text {
+  display: none;
+  font: 10px sans-serif;
+}
+
+.node circle:hover{
+  transform: scale(1.5);
+}
+
+.node circle:hover ~ text{
+  display: inline;
+}
+
+.link {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 0.5px;
+}
