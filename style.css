@@ -26,3 +26,21 @@
   stroke: #ccc;
   stroke-width: 0.5px;
 }
+
+body{
+  display: grid;
+  height: 1000px;
+  grid-template-columns: 1fr 3fr 1fr;
+}
+
+.display_tab{
+  width:100%;
+  height: 1000px;
+  overflow: auto;
+}
+
+.display_list{
+  width:100%;
+  height: 90%;
+  overflow: auto;
+}

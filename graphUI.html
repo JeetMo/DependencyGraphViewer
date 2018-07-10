@@ -3,6 +3,7 @@
 
 <head>
   <link rel="stylesheet" type="text/css" href="style.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
   <script src="./dagre.min.js"></script>
@@ -10,4 +11,14 @@
 </head>
 
 <body>
+  <div id="Source" class="display_tab" >
+    <div id="Source-table" class="table_heading"> Portfolios </div>
+    <div id="Source-list" class="list_group display_list"></div>
+    <input type="button" id="Process" value="Process">
+  </div>
+  <div id="Drawing_board"></div>
+  <div id="Target" class="display_tab">
+    <div id="Target-table" class="table_heading"></div>
+    <div id="Target-list" class="list_group display_list"></div>
+  </div>
 </body>
