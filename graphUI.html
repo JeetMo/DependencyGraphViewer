@@ -5,20 +5,45 @@
   <link rel="stylesheet" type="text/css" href="style.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="./fuzzy-autocomplete.js"></script>
   <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
   <script src="./dagre.min.js"></script>
   <script src="dagre_mapper.js" ></script>
 </head>
 
 <body>
+
   <div id="Source" class="display_tab" >
     <div id="Source-table" class="table_heading"> Portfolios </div>
     <div id="Source-list" class="list_group display_list"></div>
-    <input type="button" id="Process" value="Process">
+    <div id="SqlInput">
+      <div class="table_heading"> Enter SQL Deployment </div>
+      <textarea type="text" id="myText"></textarea>
+      <input type="button" class='buttons' id="sql_processor" value="Process Deployment">
+    </div>
+    <input type="button" class='buttons' id="Process" value="Process">
   </div>
-  <div id="Drawing_board"></div>
   <div id="Target" class="display_tab">
     <div id="Target-table" class="table_heading"></div>
     <div id="Target-list" class="list_group display_list"></div>
+    <input type="button" class='buttons' id="Switch" value="Switch to SQL">
   </div>
+  <div id="Drawing_board">
+    <div id="Heading" class="graph_heading"> Dependency Graph </div>
+    <div id="Autocomplete_Form">
+      <label for="tags">Table Name: </label>
+      <input id="tags">
+    </div>
+    <div id="Legend">
+      <div class = "legend_tab">
+        <div id='Leg_1' class='active legend'></div>
+        <p id='leg_1_t'> Active </p>
+      </div>
+      <div class = "legend_tab">
+        <div id='Leg_2' class='filtered legend'></div>
+        <p id='leg_2_t'> Filter </p>
+      </div>
+    </div>
+  </div>
+  <!-- <div id="Console"></div> -->
 </body>
